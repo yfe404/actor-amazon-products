@@ -1,0 +1,93 @@
+import { createCheerioRouter } from 'crawlee';
+import { KEYWORD, LABELS } from './constants.js';
+
+export const router = createCheerioRouter();
+
+router.addHandler(LABELS.START, async ({ request, enqueueLinks, $, log }) => {
+	log.info(`Starting crawl for ${KEYWORD}`, { url: request.loadedUrl });
+    const title = $('title').text();
+    log.info(`${title}`, { url: request.loadedUrl });
+
+	const products = $('div[data-asin]:not([data-asin=""])');
+
+	products.each((_, product) => {
+        const href = $(product).find('a[href*="/dp/"]').attr('href');
+        if (href) {
+            const absoluteUrl = new URL(href, 'https://www.amazon.com').href;
+            enqueueLinks(
+				{ 
+					urls: [absoluteUrl], 
+					label: LABELS.PRODUCT, 
+					userData: { 
+						asin: $(product).attr('data-asin') 
+					} 
+				}
+			);
+        }
+    });
+    log.info(`Enqueued ${products.length} products`);
+});
+
+router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
+	const { asin } = request.userData;
+    const title = $('title').text();
+    log.info(`${asin}`, { url: request.loadedUrl });
+    const description = $('div#productDescription').text().trim();
+
+	const offersUrl = `https://www.amazon.com/gp/aod/ajax/ref=auto_load_aod?asin=${asin}`; // todo replace with BASE_URL + asin
+	enqueueLinks(
+		{ 
+			urls: [offersUrl], 
+			label: LABELS.OFFERS, 
+			userData: { 
+				asin,
+				itemUrl: request.loadedUrl,
+				title,
+				description
+			} 
+		}
+	);
+});
+
+
+router.addHandler(LABELS.OFFERS, async ({ request, $, log, pushData }) => {
+	const { asin, title, description } = request.userData;
+
+	log.info(`Offers for ${asin}`, { url: request.loadedUrl });
+	const offers = $('#aod-offer');
+	log.info(`Found ${offers.length} offers`);
+
+	for (const offer of offers) {
+		const offerElement = $(offer);
+		const priceSymbol = offerElement.find('.a-price-symbol').text().trim();
+		const priceWhole = offerElement.find('.a-price-whole').text().trim();
+		const priceFraction = offerElement.find('.a-price-fraction').text().trim();
+		const price = `${priceSymbol}${priceWhole}${priceFraction}`;
+		const sellerText = offerElement.find('#aod-offer-soldBy').text();
+
+		const regex = /Sold by\s*(.+)\s*Seller rating/gm;
+		const match = regex.exec(sellerText);
+		let sellerName = '';
+		if (match) {
+			sellerName = match[1].trim();
+		} else {
+			const regex2 = /Sold by\s*(.+)/gm;
+			const match2 = regex2.exec(sellerText);
+			if (match2) {
+				sellerName = match2[1].trim();
+			}
+		}
+		log.info(`Seller: ${sellerName}, Price: ${price}`, { url: request.loadedUrl });
+
+		await pushData({
+			title,
+			asin,
+			itemUrl: request.loadedUrl,
+			description,
+			keyword: KEYWORD,
+			sellerName,
+			offer: price,
+		}); 
+	}
+});
+

@@ -4,7 +4,7 @@
   "type": "object",
   "schemaVersion": 1,
   "properties": {
-    "datasetId": {
+    "keyword": {
       "title": "Keyword",
       "type": "string",
       "description": "A keyword to search for offers on Amazon.",

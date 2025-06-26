@@ -1,5 +1,5 @@
 import { createCheerioRouter } from 'crawlee';
-import { KEYWORD, LABELS } from './constants.js';
+import { LABELS } from './constants.js';
 
 // function to parse the price in the forme '$valueInDollars' to a number
 function parsePrice(price: string): number {
@@ -14,7 +14,8 @@ function parsePrice(price: string): number {
 export const router = createCheerioRouter();
 
 router.addHandler(LABELS.START, async ({ request, enqueueLinks, $, log }) => {
-	log.info(`Starting crawl for ${KEYWORD}`, { url: request.loadedUrl });
+    const { keyword } = request.userData;
+	log.info(`Starting crawl for ${keyword}`, { url: request.loadedUrl });
     const title = $('title').text();
     log.info(`${title}`, { url: request.loadedUrl });
 
@@ -29,7 +30,8 @@ router.addHandler(LABELS.START, async ({ request, enqueueLinks, $, log }) => {
 					urls: [absoluteUrl],
 					label: LABELS.PRODUCT,
 					userData: {
-						asin: $(product).attr('data-asin')
+						asin: $(product).attr('data-asin'),
+                        keyword,
 					}
 				}
 			);
@@ -39,7 +41,7 @@ router.addHandler(LABELS.START, async ({ request, enqueueLinks, $, log }) => {
 });
 
 router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
-	const { asin } = request.userData;
+	const { asin, keyword } = request.userData;
     const title = $('title').text();
     log.info(`${asin}`, { url: request.loadedUrl });
     const description = $('div#productDescription').text().trim();
@@ -53,7 +55,8 @@ router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
 				asin,
 				itemUrl: request.loadedUrl,
 				title,
-				description
+				description,
+                keyword,
 			}
 		}
 	);
@@ -61,7 +64,7 @@ router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
 
 
 router.addHandler(LABELS.OFFERS, async ({ request, $, log, pushData }) => {
-	const { asin, title, description } = request.userData;
+	const { asin, keyword, title, description } = request.userData;
 
 	log.info(`Offers for ${asin}`, { url: request.loadedUrl });
 	const offers = $('#aod-offer');
@@ -96,7 +99,7 @@ router.addHandler(LABELS.OFFERS, async ({ request, $, log, pushData }) => {
     			asin,
     			itemUrl: request.loadedUrl,
     			description,
-    			keyword: KEYWORD,
+    			keyword,
     			sellerName,
     			offer: priceStr,
     		});

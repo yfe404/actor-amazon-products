@@ -1,6 +1,6 @@
 import { Actor } from 'apify';
 import { CheerioCrawler } from 'crawlee';
-import { LABELS } from './constants.js';
+import { BASE_URL, LABELS } from './constants.js';
 import { router } from './routes.js';
 
 interface Input {
@@ -9,16 +9,20 @@ interface Input {
 
 await Actor.init();
 
+const {keyword} = await Actor.getInput<Input>();
 const crawler = new CheerioCrawler({
     requestHandler: router,
     // Comment this option to scrape the full website.
     maxRequestsPerCrawl: 50,
 });
 
-const searchResultsUrl = 'https://www.amazon.com/s?k=iphone&ref=nb_sb_noss' // BUGGED, so hardcoded instead of new URL(KEYWORD, BASE_URL).href;
+const searchResultsUrl = new URL(BASE_URL + keyword).href;
 await crawler.addRequests([{
 	url: searchResultsUrl,
 	label: LABELS.START,
+    userData: {
+        keyword,
+    },
 }]);
 await crawler.run();
 

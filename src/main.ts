@@ -9,7 +9,11 @@ interface Input {
 
 await Actor.init();
 
-const {keyword} = await Actor.getInput<Input>();
+const input = await Actor.getInput<Input>();
+if (!input) {
+    throw new Error('No input provided – expected an object with `keyword`');
+}
+const { keyword } = input;
 const crawler = new CheerioCrawler({
     requestHandler: router,
     // Comment this option to scrape the full website.

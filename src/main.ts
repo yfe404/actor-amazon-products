@@ -15,12 +15,7 @@ if (!input) {
 }
 const { keyword } = input;
 
-/*
-const proxyConfiguration = await Actor.createProxyConfiguration({
-    proxyUrls = ["http://groups-BUYPROXIES94952:apify_proxy_bEN32MbUeeFBbracQsGtRglUBhngNC3v7pG1@proxy.apify.com:8000"]
-}); */
-
-const proxyConfiguration = await Actor.createProxyConfiguration();
+const proxyConfiguration = await Actor.createProxyConfiguration({countryCode: 'US'});
 
 const crawler = new CheerioCrawler({
     requestHandler: router,

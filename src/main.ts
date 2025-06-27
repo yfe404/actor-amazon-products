@@ -14,10 +14,19 @@ if (!input) {
     throw new Error('No input provided – expected an object with `keyword`');
 }
 const { keyword } = input;
+
+/*
+const proxyConfiguration = await Actor.createProxyConfiguration({
+    proxyUrls = ["http://groups-BUYPROXIES94952:apify_proxy_bEN32MbUeeFBbracQsGtRglUBhngNC3v7pG1@proxy.apify.com:8000"]
+}); */
+
+const proxyConfiguration = await Actor.createProxyConfiguration();
+
 const crawler = new CheerioCrawler({
     requestHandler: router,
     // Comment this option to scrape the full website.
     maxRequestsPerCrawl: 50,
+    proxyConfiguration,
 });
 
 const searchResultsUrl = new URL(BASE_URL + keyword).href;

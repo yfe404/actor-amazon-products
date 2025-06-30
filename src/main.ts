@@ -1,5 +1,6 @@
 import { Actor } from 'apify';
 import { CheerioCrawler } from 'crawlee';
+
 import { BASE_URL, LABELS } from './constants.js';
 import { router } from './routes.js';
 

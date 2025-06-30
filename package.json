@@ -28,6 +28,7 @@
 		"start:dev": "tsx src/main.ts",
 		"build": "tsc",
 		"lint": "eslint",
+        "typecheck": "tsc --noEmit",
 		"lint:fix": "eslint --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",

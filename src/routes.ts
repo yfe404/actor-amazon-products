@@ -1,9 +1,10 @@
 import { createCheerioRouter } from 'crawlee';
+
 import { LABELS } from './constants.js';
 
 // function to parse the price in the forme '$valueInDollars' to a number
 function parsePrice(price: string): number {
-    const match = price.match(/^\$(\d+(\,\d+)?(\.\d{1,2})?)$/);
+    const match = price.match(/^\$(\d+(,\d+)?(\.\d{1,2})?)$/);
     if (!match) {
         console.log(`Invalid price format: ${price}`);
         throw new Error(`Invalid price format: ${price}`);
@@ -25,7 +26,7 @@ router.addHandler(LABELS.START, async ({ request, enqueueLinks, $, log }) => {
         const href = $(product).find('a[href*="/dp/"]').attr('href');
         if (href) {
             const absoluteUrl = new URL(href, 'https://www.amazon.com').href;
-            enqueueLinks(
+            void enqueueLinks(
 				{
 					urls: [absoluteUrl],
 					label: LABELS.PRODUCT,
@@ -47,7 +48,7 @@ router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
     const description = $('div#productDescription').text().trim();
 
 	const offersUrl = `https://www.amazon.com/gp/aod/ajax/ref=auto_load_aod?asin=${asin}`; // todo replace with BASE_URL + asin
-	enqueueLinks(
+	void enqueueLinks(
 		{
 			urls: [offersUrl],
 			label: LABELS.OFFERS,
@@ -102,9 +103,14 @@ router.addHandler(LABELS.OFFERS, async ({ request, $, log, pushData }) => {
     			keyword,
     			sellerName,
     			offer: priceStr,
+                price: parsedPrice,
     		});
          } catch (error) {
-             continue;
+            if (error instanceof Error) {
+                log.error(`Error processing offer for ${asin}: ${error.message}`, { url: request.loadedUrl });
+            } else {
+                log.error(`Unknown error processing offer for ${asin}`, { url: request.loadedUrl });
+            }
          }
 	}
 });

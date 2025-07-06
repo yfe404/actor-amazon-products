@@ -1,15 +1,15 @@
 {
-  "title": "Keyword Schema",
-  "description": "Keyword to search for offers on Amazon.",
-  "type": "object",
-  "schemaVersion": 1,
-  "properties": {
-    "keyword": {
-      "title": "Keyword",
-      "type": "string",
-      "description": "A keyword to search for offers on Amazon.",
-      "editor": "textfield"
-    }
-  },
-  "required": ["keyword"]
+    "title": "Keyword Schema",
+    "description": "Keyword to search for offers on Amazon.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "keyword": {
+            "title": "Keyword",
+            "type": "string",
+            "description": "A keyword to search for offers on Amazon.",
+            "editor": "textfield"
+        }
+    },
+    "required": ["keyword"]
 }

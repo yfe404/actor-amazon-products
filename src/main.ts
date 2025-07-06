@@ -16,7 +16,7 @@ if (!input) {
 }
 const { keyword } = input;
 
-const proxyConfiguration = await Actor.createProxyConfiguration({countryCode: 'US'});
+const proxyConfiguration = await Actor.createProxyConfiguration({ countryCode: 'US' });
 
 const crawler = new CheerioCrawler({
     requestHandler: router,
@@ -26,13 +26,15 @@ const crawler = new CheerioCrawler({
 });
 
 const searchResultsUrl = new URL(BASE_URL + keyword).href;
-await crawler.addRequests([{
-	url: searchResultsUrl,
-	label: LABELS.START,
-    userData: {
-        keyword,
+await crawler.addRequests([
+    {
+        url: searchResultsUrl,
+        label: LABELS.START,
+        userData: {
+            keyword,
+        },
     },
-}]);
+]);
 await crawler.run();
 
 await Actor.exit();

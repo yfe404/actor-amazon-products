@@ -1,6 +1,6 @@
 import { createCheerioRouter } from 'crawlee';
 
-import { LABELS } from './constants.js';
+import { BASE_OFFERS_URL, LABELS } from './constants.js';
 
 // function to parse the price in the forme '$valueInDollars' to a number
 function parsePrice(price: string): number {
@@ -45,7 +45,7 @@ router.addHandler(LABELS.PRODUCT, async ({ enqueueLinks, request, $, log }) => {
     log.info(`${asin}`, { url: request.loadedUrl });
     const description = $('div#productDescription').text().trim();
 
-    const offersUrl = `https://www.amazon.com/gp/aod/ajax/ref=auto_load_aod?asin=${asin}`; // todo replace with BASE_URL + asin
+    const offersUrl = `${BASE_OFFERS_URL}${asin}`;
     void enqueueLinks({
         urls: [offersUrl],
         label: LABELS.OFFERS,
